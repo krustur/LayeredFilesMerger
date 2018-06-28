@@ -25,24 +25,6 @@ namespace LayeredFilesMergerEngine
         void ExploreLayersFolder();
     }
 
-    public class FileSysDto
-    {
-        public string Name { get; set; }
-
-        public override string ToString()
-        {
-            return $"{nameof(Name)}: {Name}, {nameof(IsDirectory)}: {IsDirectory}";
-        }
-
-        public string Extension { get; set; }
-        public bool IsDirectory { get; set; }
-        public long? Size { get; set; }
-        public DateTime Modified { get; set; }
-        public string FullPath { get; set; }
-        public string FileSystemPath { get; set; }
-    }
-
-
     public class Engine : IEngine
     {
         private EngineConfig _config;
@@ -448,91 +430,4 @@ namespace LayeredFilesMergerEngine
         }
     }
 
-    public interface ILayerNameInfoService
-    {
-        string GetName(string layerKey);
-        string GetVersion(string layerKey);
-    }
-
-    public class LayerNameInfoService : ILayerNameInfoService
-    {
-        public string GetName(string layerKey)
-        {
-            if (layerKey.Contains('_'))
-            {
-                var parts = layerKey.Split('_');
-                if (parts.Length != 2)
-                {
-                    throw new Exception("Please use a single underscore char in layer folder names only");
-                }
-                return parts[0];
-            }
-            return layerKey;
-        }
-
-        public string GetVersion(string layerKey)
-        {
-            if (layerKey.Contains('_'))
-            {
-                var parts = layerKey.Split('_');
-                if (parts.Length != 2)
-                {
-                    throw new Exception("Please use a single underscore char in layer folder names only");
-                }
-                return parts[parts.Length-1];
-            }
-            return "-";
-        }
-    }
-
-
-    public class Layer
-    {
-        [JsonIgnore]
-        public string Name { get; set; }
-        [JsonIgnore]
-        public string Version { get; set; }
-
-        //[JsonIgnore]
-        //public bool IsDirty { get; set; }
-
-        public bool Include { get; set; }
-        public ulong Priority { get; set; }
-        public IList<EnFile> EnFiles { get; set; }
-    }
-
-    public class EnFile
-    {
-    }
-
-    public class LayerListDto
-    {
-        public override string ToString()
-        {
-            return $"[{Include}] [{Priority}] {Name} {Version}";
-        }
-
-        public string Key { get; set; }
-        public bool Include { get; set; }
-        public ulong Priority { get; set; }
-        public string Name { get; set; }
-        public string Version { get; set; }
-    }
-
-    public static class LongExtensions
-    {
-        public static string GetSizeString(this long? size)
-        {
-            if (size == null)
-                return string.Empty;
-
-            string[] suf = { "B", "KB", "MB", "GB", "TB", "PB", "EB" }; //Longs run out around EB
-            if (size.Value == 0)
-                return "0" + suf[0];
-            var bytes = Math.Abs(size.Value);
-            var place = Convert.ToInt32(Math.Floor(Math.Log(bytes, 1024)));
-            var num = Math.Round(bytes / Math.Pow(1024, place), 1);
-            return (Math.Sign(size.Value) * num) + suf[place];
-        }
-    }
 }
